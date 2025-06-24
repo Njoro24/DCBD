@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from controllers.job_controller import JobController
 from controllers.user_controller import UserController
+from controllers.skill_controller import SkillController
 import os
 
 # Create blueprint
@@ -99,6 +100,47 @@ def apply_to_job(job_id):
         else:
             return jsonify({'error': result['error']}), 400
             
+    except Exception as e:
+        return jsonify({'error': 'Internal server error'}), 500
+    finally:
+        db.close()
+
+@job_details_bp.route('/api/jobs', methods=['GET'])
+def search_jobs():
+    """
+    GET /api/jobs
+    Search and filter jobs with optional skill filter and pagination
+    Query params: search, skill, page, limit
+    """
+    db = get_db()
+    job_controller = JobController(db)
+    
+    try:
+        search = request.args.get('search')
+        skill = request.args.get('skill')
+        page = request.args.get('page', default=1, type=int)
+        limit = request.args.get('limit', default=10, type=int)
+        
+        result = job_controller.search_jobs(search=search, skill=skill, page=page, limit=limit)
+        
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': 'Internal server error'}), 500
+    finally:
+        db.close()
+
+@job_details_bp.route('/api/skills', methods=['GET'])
+def get_skills():
+    """
+    GET /api/skills
+    Get all skills
+    """
+    db = get_db()
+    skill_controller = SkillController(db)
+    
+    try:
+        skills = skill_controller.get_all_skills()
+        return jsonify(skills), 200
     except Exception as e:
         return jsonify({'error': 'Internal server error'}), 500
     finally:
