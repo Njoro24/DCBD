@@ -1,8 +1,16 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum, Float
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum, Float, Table
 from sqlalchemy.orm import relationship
 from models.user import Base
 from datetime import datetime
 import enum
+
+# Association table for many-to-many relationship between jobs and skills
+job_skill_association = Table(
+    'job_skill_association',
+    Base.metadata,
+    Column('job_id', Integer, ForeignKey('jobs.id')),
+    Column('skill_id', Integer, ForeignKey('skills.id'))
+)
 
 class JobStatus(enum.Enum):
     OPEN = "open"
@@ -28,6 +36,7 @@ class Job(Base):
     # Relationships
     client = relationship("User", back_populates="posted_jobs")
     applications = relationship("Application", back_populates="job")
+    skills = relationship("Skill", secondary=job_skill_association, back_populates="jobs")
     
     def to_dict(self):
         return {
@@ -43,5 +52,6 @@ class Job(Base):
             'client_id': self.client_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'client': self.client.to_dict() if self.client else None
+            'client': self.client.to_dict() if self.client else None,
+            'skills': [skill.to_dict() for skill in self.skills] if self.skills else []
         }

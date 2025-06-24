@@ -3,7 +3,9 @@ from models.job import Job
 from models.user import User
 from models.application import Application, ApplicationStatus
 from sqlalchemy.exc import SQLAlchemyError
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
+from models.skill import Skill
+from sqlalchemy import or_, and_
 
 class JobController:
     def __init__(self, db_session: Session):
@@ -72,3 +74,35 @@ class JobController:
             self.db.rollback()
             print(f"Database error: {e}")
             return {'success': False, 'error': 'Database error occurred'}
+    
+    def search_jobs(self, search: str = None, skill: str = None, page: int = 1, limit: int = 10) -> Dict[str, Any]:
+        """
+        Search and filter jobs with optional skill filter and pagination
+        """
+        try:
+            query = self.db.query(Job)
+            
+            if search:
+                search_filter = "%{}%".format(search)
+                query = query.filter(or_(
+                    Job.title.ilike(search_filter),
+                    Job.description.ilike(search_filter),
+                    Job.requirements.ilike(search_filter)
+                ))
+            
+            if skill:
+                # Join with skills table if skill filter is provided
+                query = query.join(Job.skills).filter(Skill.name.ilike(f"%{skill}%"))
+            
+            total = query.count()
+            jobs = query.offset((page - 1) * limit).limit(limit).all()
+            
+            return {
+                'total': total,
+                'page': page,
+                'limit': limit,
+                'jobs': [job.to_dict() for job in jobs]
+            }
+        except SQLAlchemyError as e:
+            print(f"Database error: {e}")
+            return {'error': 'Database error occurred'}
