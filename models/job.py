@@ -1,15 +1,14 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum, Float, Table
-from sqlalchemy.orm import relationship
-from models.user import Base
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import enum
 
+db = SQLAlchemy()
+
 # Association table for many-to-many relationship between jobs and skills
-job_skill_association = Table(
+job_skill_association = db.Table(
     'job_skill_association',
-    Base.metadata,
-    Column('job_id', Integer, ForeignKey('jobs.id')),
-    Column('skill_id', Integer, ForeignKey('skills.id'))
+    db.Column('job_id', db.Integer, db.ForeignKey('jobs.id')),
+    db.Column('skill_id', db.Integer, db.ForeignKey('skills.id'))
 )
 
 class JobStatus(enum.Enum):
@@ -17,26 +16,26 @@ class JobStatus(enum.Enum):
     CLOSED = "closed"
     PAUSED = "paused"
 
-class Job(Base):
+class Job(db.Model):
     __tablename__ = 'jobs'
     
-    id = Column(Integer, primary_key=True)
-    title = Column(String(200), nullable=False)
-    description = Column(Text, nullable=False)
-    requirements = Column(Text)
-    salary_min = Column(Float)
-    salary_max = Column(Float)
-    location = Column(String(200))
-    job_type = Column(String(50))  # full-time, part-time, contract, etc.
-    status = Column(Enum(JobStatus), default=JobStatus.OPEN)
-    client_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text)
+    salary_min = db.Column(db.Float)
+    salary_max = db.Column(db.Float)
+    location = db.Column(db.String(200))
+    job_type = db.Column(db.String(50))  # full-time, part-time, contract, etc.
+    status = db.Column(db.Enum(JobStatus), default=JobStatus.OPEN)
+    client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    client = relationship("User", back_populates="posted_jobs")
-    applications = relationship("Application", back_populates="job")
-    skills = relationship("Skill", secondary=job_skill_association, back_populates="jobs")
+    client = db.relationship("User", back_populates="posted_jobs")
+    applications = db.relationship("Application", back_populates="job")
+    skills = db.relationship("Skill", secondary=job_skill_association, back_populates="jobs")
     
     def to_dict(self):
         return {
