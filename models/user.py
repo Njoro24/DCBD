@@ -1,27 +1,25 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-Base = declarative_base()
+db = SQLAlchemy()
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'users'
     
-    id = Column(Integer, primary_key=True)
-    email = Column(String(255), unique=True, nullable=False)
-    first_name = Column(String(100), nullable=False)
-    last_name = Column(String(100), nullable=False)
-    phone = Column(String(20))
-    company = Column(String(200))
-    position = Column(String(200))
-    bio = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20))
+    company = db.Column(db.String(200))
+    position = db.Column(db.String(200))
+    bio = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    posted_jobs = relationship("Job", back_populates="client")
-    applications = relationship("Application", back_populates="applicant")
+    posted_jobs = db.relationship("Job", back_populates="client")
+    applications = db.relationship("Application", back_populates="applicant")
     
     def to_dict(self):
         return {

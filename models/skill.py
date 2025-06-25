@@ -1,14 +1,15 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
-from models.user import Base
 
-class Skill(Base):
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+class Skill(db.Model):
     __tablename__ = 'skills'
     
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
     
-    jobs = relationship("Job", secondary="job_skill_association", back_populates="skills")
+    jobs = db.relationship("Job", secondary="job_skill_association", back_populates="skills")
     
     def to_dict(self):
         return {
