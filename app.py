@@ -1,43 +1,35 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum
-from sqlalchemy.orm import relationship
-from models.user import Base
-from datetime import datetime
-import enum
+# app.py
 
-class ApplicationStatus(enum.Enum):
-    PENDING = "pending"
-    REVIEWED = "reviewed"
-    ACCEPTED = "accepted"
-    REJECTED = "rejected"
+from flask import Flask
+from flask_cors import CORS
+from extensions import db, bcrypt, jwt
+from routes.auth import auth_bp
+from dotenv import load_dotenv
+import os
 
-class Application(Base):
-    __tablename__ = 'applications'
-    
-    id = Column(Integer, primary_key=True)
-    job_id = Column(Integer, ForeignKey('jobs.id'), nullable=False)
-    applicant_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    cover_letter = Column(Text)
-    resume_url = Column(String(500))
-    status = Column(Enum(ApplicationStatus), default=ApplicationStatus.PENDING)
-    notes = Column(Text)
-    applied_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
-    job = relationship("Job", back_populates="applications")
-    applicant = relationship("User", back_populates="applications")
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'job_id': self.job_id,
-            'applicant_id': self.applicant_id,
-            'cover_letter': self.cover_letter,
-            'resume_url': self.resume_url,
-            'status': self.status.value if self.status else None,
-            'notes': self.notes,
-            'applied_at': self.applied_at.isoformat() if self.applied_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'job': self.job.to_dict() if self.job else None,
-            'applicant': self.applicant.to_dict() if self.applicant else None
-        }
+#  Load environment variables
+load_dotenv()
+
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
+
+    #  Configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "sqlite:///instance/devconnect.db")
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+    app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
+
+    #  Initialize extensions
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
+
+    #  Register Blueprints
+    app.register_blueprint(auth_bp)
+
+    return app
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True)
