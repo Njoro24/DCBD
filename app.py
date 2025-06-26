@@ -6,7 +6,7 @@ from datetime import timedelta
 import os
 
 # Import route classes
-from routes.jobs import RegisterResource, LoginResource, RefreshResource, ProfileResource
+
 from routes.jobs import (
     JobResource, JobListResource, JobApplicationResource, 
     MyJobsResource, MyApplicationsResource, JobApplicationsResource
