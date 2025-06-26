@@ -40,8 +40,23 @@ from routes.auth import auth_bp
 from dotenv import load_dotenv
 import os
 
+from routes.jobs import RegisterResource, LoginResource, RefreshResource, ProfileResource, JobListResource
+
+feature/profile-endpoints
+# Import route classes
+
+from routes.jobs import (
+    JobResource, JobListResource, JobApplicationResource, 
+    MyJobsResource, MyApplicationsResource, JobApplicationsResource
+)
+from routes.users import (
+    UserResource, UserListResource, ChangePasswordResource, 
+    UserStatsResource
+)
+=======
 #  Load environment variables
 load_dotenv()
+main
 
 def create_app():
     app = Flask(__name__)
