@@ -1,32 +1,33 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from config import Config
+from extensions import db
+from models.user import User
+from models.job import Job
+from models.client import Client
 
-db = SQLAlchemy()
-cors = CORS()
+# ✅ Import the jobs blueprint
+from routes.jobs import jobs_bp
 
 def create_app():
-    app= Flask(__name__)
-    app.config.from_object(Config)
-    CORS
-
+    app = Flask(__name__)
+    
+    # Configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///devconnect.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Initialize extensions
     db.init_app(app)
-    cors.init_app(app)
 
-    from routes.home import home_bp
-    app.register_blueprint(home_bp)
+    # ✅ Register blueprints
+    app.register_blueprint(jobs_bp)
 
+    # Create tables within application context
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables created successfully!")
+    
     return app
 
+# For running directly
 if __name__ == '__main__':
     app = create_app()
-
-    with app.app_context(): 
-        db.create_all()
     app.run(debug=True)
-
-
-
-
-
