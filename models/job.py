@@ -1,42 +1,74 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum, Float, Table
-from sqlalchemy.orm import relationship
-from models.user import Base
+kibet
+from extensions import db
+from datetime import datetime
+
+
+
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import enum
 
+db = SQLAlchemy()
+
 # Association table for many-to-many relationship between jobs and skills
-job_skill_association = Table(
+job_skill_association = db.Table(
     'job_skill_association',
-    Base.metadata,
-    Column('job_id', Integer, ForeignKey('jobs.id')),
-    Column('skill_id', Integer, ForeignKey('skills.id'))
+    db.Column('job_id', db.Integer, db.ForeignKey('jobs.id')),
+    db.Column('skill_id', db.Integer, db.ForeignKey('skills.id'))
 )
 
 class JobStatus(enum.Enum):
     OPEN = "open"
     CLOSED = "closed"
     PAUSED = "paused"
+main
 
-class Job(Base):
+class Job(db.Model):
     __tablename__ = 'jobs'
     
-    id = Column(Integer, primary_key=True)
-    title = Column(String(200), nullable=False)
-    description = Column(Text, nullable=False)
-    requirements = Column(Text)
-    salary_min = Column(Float)
-    salary_max = Column(Float)
-    location = Column(String(200))
-    job_type = Column(String(50))  # full-time, part-time, contract, etc.
-    status = Column(Enum(JobStatus), default=JobStatus.OPEN)
-    client_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+kibet
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text)
+    budget = db.Column(db.Float)
+    is_featured = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(20), default='open')  # open, closed, in_progress
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        """Convert Job object to dictionary for JSON serialization"""
+        return {
+            'id': self.id,
+            'client_id': self.client_id,
+            'title': self.title,
+            'description': self.description,
+            'requirements': self.requirements,
+            'budget': self.budget,
+            'is_featured': self.is_featured,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text)
+    salary_min = db.Column(db.Float)
+    salary_max = db.Column(db.Float)
+    location = db.Column(db.String(200))
+    job_type = db.Column(db.String(50))  # full-time, part-time, contract, etc.
+    status = db.Column(db.Enum(JobStatus), default=JobStatus.OPEN)
+    client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    client = relationship("User", back_populates="posted_jobs")
-    applications = relationship("Application", back_populates="job")
-    skills = relationship("Skill", secondary=job_skill_association, back_populates="jobs")
+    client = db.relationship("User", back_populates="posted_jobs")
+    applications = db.relationship("Application", back_populates="job")
+    skills = db.relationship("Skill", secondary=job_skill_association, back_populates="jobs")
     
     def to_dict(self):
         return {
@@ -55,3 +87,4 @@ class Job(Base):
             'client': self.client.to_dict() if self.client else None,
             'skills': [skill.to_dict() for skill in self.skills] if self.skills else []
         }
+main

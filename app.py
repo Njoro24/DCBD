@@ -9,10 +9,10 @@ import os
 load_dotenv()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(_name_)
     CORS(app)
 
-    basedir = os.path.abspath(os.path.dirname(__file__))
+    basedir = os.path.abspath(os.path.dirname(_file_))
 
     # Ensure the 'instance' folder exists
     os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
@@ -44,7 +44,7 @@ def create_app():
 
     return app
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     app = create_app()
     with app.app_context():
         db.create_all()  # Only for development use
