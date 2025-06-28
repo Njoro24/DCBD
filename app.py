@@ -2,18 +2,21 @@ from flask import Flask
 from flask_cors import CORS
 from extensions import db, bcrypt, jwt
 from routes.auth import auth_bp
+# Add this import if you created a separate user.py file
+# from routes.user import user_bp
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
 load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, origins=["http://localhost:5173"], 
+         allow_headers=["Content-Type", "Authorization"], 
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         supports_credentials=True)
 
-    # Configuration
-    # Use absolute path for SQLite database
+   
     db_path = os.path.join(os.getcwd(), "database", "instance", "dcbd.db")
     database_uri = os.getenv("DATABASE_URL", f"sqlite:///{db_path}")
     app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
@@ -36,17 +39,19 @@ def create_app():
     if os.path.exists('instance'):
         print(f"Instance directory permissions: {oct(os.stat('instance').st_mode)[-3:]}")
 
-    # Initialize extensions
+ 
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
 
-    # Register Blueprints
+   
     app.register_blueprint(auth_bp)
+    # Add this if you created a separate user blueprint
+    # app.register_blueprint(user_bp)
 
-    # Create database tables if they don't exist
+    
     with app.app_context():
-        # Ensure database directory exists
+       
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         db.create_all()
 

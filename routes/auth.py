@@ -22,10 +22,17 @@ class MeAPI(Resource):
     def get(self):
         return get_current_user()
 
+
+class UserProfileAPI(Resource):
+    @jwt_required()
+    def get(self):
+        return get_current_user()
+
 # --- Register RESTful Routes ---
 api.add_resource(RegisterAPI, '/api/auth/register')
 api.add_resource(LoginAPI, '/api/auth/login')
 api.add_resource(MeAPI, '/api/auth/me')
+api.add_resource(UserProfileAPI, '/api/user/profile')  
 
 # --- Verify Token (Non-Resource Route) ---
 @auth_bp.route('/api/auth/verify-token', methods=['GET'])
