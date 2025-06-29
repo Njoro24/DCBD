@@ -9,10 +9,10 @@ import os
 load_dotenv()
 
 def create_app():
-    app = Flask(_name_)
+    app = Flask(__name__)
     CORS(app)
 
-    basedir = os.path.abspath(os.path.dirname(_file_))
+    basedir = os.path.abspath(os.path.dirname(__file__))
 
     # Ensure the 'instance' folder exists
     os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
@@ -42,9 +42,14 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp)
 
+    # Import models to register them with SQLAlchemy before creating tables
+    from models.user import User
+    from models.job import Job
+    from models.skill import Skill
+
     return app
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app = create_app()
     with app.app_context():
         db.create_all()  # Only for development use
