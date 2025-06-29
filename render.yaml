@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: devconnect-backend
+    env: python
+    buildCommand: "pipenv install"
+    startCommand: "gunicorn app:create_app()"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false

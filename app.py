@@ -5,7 +5,7 @@ from routes.auth import auth_bp
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
+
 load_dotenv()
 
 def create_app():
@@ -14,13 +14,13 @@ def create_app():
 
     basedir = os.path.abspath(os.path.dirname(__file__))
 
-    # Ensure the 'instance' folder exists
+    
     os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
 
-    # Load DB URI from env and safely resolve relative SQLite path
+    
     db_uri = os.getenv("DATABASE_URL")
     if db_uri and db_uri.startswith("sqlite:///") and not db_uri.startswith("sqlite:////"):
-        # Convert relative SQLite path to absolute path
+        
         rel_path = db_uri.replace("sqlite:///", "")
         abs_path = os.path.join(basedir, rel_path)
         db_uri = f"sqlite:///{abs_path}"
@@ -47,5 +47,5 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     with app.app_context():
-        db.create_all()  # Only for development use
+        db.create_all()  
     app.run(debug=True)
