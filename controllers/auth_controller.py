@@ -1,4 +1,3 @@
-# controllers/auth_controller.py
 from flask import request
 from models.user import User
 from extensions import db

@@ -24,3 +24,13 @@ class User(db.Model, SerializerMixin):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "role": self.role,
+            "bio": self.bio,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
