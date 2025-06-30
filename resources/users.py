@@ -1,14 +1,8 @@
-from flask import Blueprint
-from flask_restful import Api
 from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from controllers.user_controller import UserController
-from extensions import db  # SQLAlchemy db instance
-
-# Create the Blueprint
-users_bp = Blueprint('users', __name__)
-api = Api(users_bp)
+from extensions import db
 
 class UserResource(Resource):
     def get(self, user_id):
@@ -16,7 +10,7 @@ class UserResource(Resource):
         GET /api/users/:id
         Get public user info (for job client details)
         """
-        user_controller = UserController(db)  # Pass db instance
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             user = user_controller.get_client_info(user_id)
@@ -46,7 +40,7 @@ class UserResource(Resource):
         PUT /api/users/:id
         Update user profile (only own profile)
         """
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             current_user_id = get_jwt_identity()
@@ -85,7 +79,7 @@ class UserResource(Resource):
         DELETE /api/users/:id
         Delete user account (only own account)
         """
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             current_user_id = get_jwt_identity()
@@ -112,7 +106,7 @@ class UserListResource(Resource):
         GET /api/users
         Get list of users (admin only or for search functionality)
         """
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             # Get query parameters for filtering/searching
@@ -159,7 +153,7 @@ class ChangePasswordResource(Resource):
         """
         from werkzeug.security import generate_password_hash, check_password_hash
         
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             current_user_id = get_jwt_identity()
@@ -174,8 +168,8 @@ class ChangePasswordResource(Resource):
             if not current_password or not new_password:
                 return {'error': 'Current password and new password are required'}, 400
             
-            # Get user
-            user = user_controller.get_user_by_id(current_user_id)
+            # Get user with password hash
+            user = user_controller.get_user_with_password(current_user_id)  # Fixed: Use method that includes password
             if not user:
                 return {'error': 'User not found'}, 404
             
@@ -204,11 +198,12 @@ class UserStatsResource(Resource):
         GET /api/users/:id/stats
         Get user statistics (jobs posted, applications sent, etc.)
         """
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             current_user_id = get_jwt_identity()
             
+           
             if current_user_id == user_id:
                 stats = user_controller.get_user_detailed_stats(user_id)
             else:
@@ -229,7 +224,7 @@ class TokenVerificationResource(Resource):
         GET /api/verify-token
         Verify if the current token is valid
         """
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             current_user_id = get_jwt_identity()
@@ -256,7 +251,7 @@ class UserProfileResource(Resource):
         GET /api/users/:id/profile
         Get complete user profile (own profile only)
         """
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             current_user_id = get_jwt_identity()
@@ -295,7 +290,7 @@ class UserApplicationsResource(Resource):
         GET /api/users/:id/applications
         Get user's job applications
         """
-        user_controller = UserController(db)
+        user_controller = UserController(db.session)  # Fixed: Added db.session
         
         try:
             current_user_id = get_jwt_identity()
@@ -329,13 +324,3 @@ class LogoutResource(Resource):
             
         except Exception as e:
             return {'error': 'Internal server error'}, 500
-
-# Register all the resources with their endpoints
-api.add_resource(UserListResource, '/users')
-api.add_resource(UserResource, '/users/<int:user_id>')
-api.add_resource(UserProfileResource, '/users/<int:user_id>/profile')
-api.add_resource(UserStatsResource, '/users/<int:user_id>/stats')
-api.add_resource(UserApplicationsResource, '/users/<int:user_id>/applications')
-api.add_resource(ChangePasswordResource, '/users/change-password')
-api.add_resource(TokenVerificationResource, '/verify-token')
-api.add_resource(LogoutResource, '/logout')
