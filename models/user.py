@@ -5,7 +5,14 @@ from datetime import datetime
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
-    serialize_rules = ('-password_hash',)
+    serialize_rules = (
+        '-password_hash',
+        '-applications.applicant',
+        '-posted_jobs.client',
+        'skills',
+        'applications.job',
+        'posted_jobs',
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -18,6 +25,7 @@ class User(db.Model, SerializerMixin):
     # Relationships
     posted_jobs = db.relationship("Job", back_populates="client")
     applications = db.relationship("Application", back_populates="applicant")
+    skills = db.relationship("Skill", secondary="user_skills", back_populates="users")
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -32,5 +40,8 @@ class User(db.Model, SerializerMixin):
             "email": self.email,
             "role": self.role,
             "bio": self.bio,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "skills": [skill.to_dict() for skill in self.skills],
+            "posted_jobs": [job.to_dict() for job in self.posted_jobs],
+            "applications": [app.to_dict() for app in self.applications],
         }

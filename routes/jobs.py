@@ -2,14 +2,14 @@ kibet
 # routes/jobs.py
 
 from flask import Blueprint, request, jsonify, current_app
-from extensions import db  # ✅ CORRECT import
-from models.job import Job  # ✅ Import Job model only — don't redefine it!
+from extensions import db  # CORRECT import
+from models.job import Job  #  Import Job model only — don't redefine it!
 from sqlalchemy.exc import IntegrityError
 
-# ✅ Register Blueprint
+#  Register Blueprint
 jobs_bp = Blueprint('jobs', __name__, url_prefix='/api/jobs')
 
-# ✅ Helper functions
+#  Helper functions
 def error_response(message, status_code):
     return jsonify({'error': message}), status_code
 
@@ -21,7 +21,7 @@ def success_response(data=None, message=None, status_code=200):
         response['message'] = message
     return jsonify(response), status_code
 
-# ✅ CRUD Routes
+#  CRUD Routes
 
 # GET /api/jobs
 @jobs_bp.route('', methods=['GET'])

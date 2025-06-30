@@ -20,6 +20,7 @@ class MeAPI(Resource):
     def get(self):
         return get_current_user()
 
+
 # --- Register RESTful Routes ---
 api.add_resource(RegisterAPI, '/register')
 api.add_resource(LoginAPI, '/login')

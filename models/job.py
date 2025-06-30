@@ -44,6 +44,7 @@ class Job(db.Model):
             'job_type': self.job_type,
             'status': self.status.value if self.status else None,
             'client_id': self.client_id,
+            'client_name': self.client.name if self.client else None,
             'is_featured': self.is_featured,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
