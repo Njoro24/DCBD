@@ -6,10 +6,7 @@ from database import get_db
 
 class UserResource(Resource):
     def get(self, user_id):
-        """
-        GET /api/users/:id
-        Get public user info (for job client details)
-        """
+   
         db = get_db()
         user_controller = UserController(db)
         
@@ -19,7 +16,7 @@ class UserResource(Resource):
             if not user:
                 return {'error': 'User not found'}, 404
             
-            # Return only public information
+        
             public_user_info = {
                 'id': user['id'],
                 'first_name': user['first_name'],
@@ -49,7 +46,7 @@ class UserResource(Resource):
         try:
             current_user_id = get_jwt_identity()
             
-            # Users can only update their own profile
+            
             if current_user_id != user_id:
                 return {'error': 'Unauthorized to update this profile'}, 403
             
@@ -58,7 +55,7 @@ class UserResource(Resource):
             if not data:
                 return {'error': 'No data provided'}, 400
             
-            # Remove sensitive fields that shouldn't be updated here
+        
             sensitive_fields = ['id', 'password_hash', 'created_at']
             for field in sensitive_fields:
                 data.pop(field, None)
@@ -91,11 +88,11 @@ class UserResource(Resource):
         try:
             current_user_id = get_jwt_identity()
             
-            # Users can only delete their own account
+        
             if current_user_id != user_id:
                 return {'error': 'Unauthorized to delete this account'}, 403
             
-            # Delete user
+        
             success = user_controller.delete_user(user_id)
             
             if success:
@@ -119,7 +116,7 @@ class UserListResource(Resource):
         user_controller = UserController(db)
         
         try:
-            # Get query parameters for filtering/searching
+    
             search = request.args.get('search', '')
             company = request.args.get('company', '')
             position = request.args.get('position', '')
