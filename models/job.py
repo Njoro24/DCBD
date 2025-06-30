@@ -1,58 +1,18 @@
-kibet
 from extensions import db
-from datetime import datetime
-
-
-
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import enum
 
-db = SQLAlchemy()
-
-# Association table for many-to-many relationship between jobs and skills
-job_skill_association = db.Table(
-    'job_skill_association',
-    db.Column('job_id', db.Integer, db.ForeignKey('jobs.id')),
-    db.Column('skill_id', db.Integer, db.ForeignKey('skills.id'))
-)
+from .skill import job_skill_association  # Import association table
 
 class JobStatus(enum.Enum):
     OPEN = "open"
     CLOSED = "closed"
     PAUSED = "paused"
-main
 
 class Job(db.Model):
     __tablename__ = 'jobs'
-    
-    id = db.Column(db.Integer, primary_key=True)
-kibet
-    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    requirements = db.Column(db.Text)
-    budget = db.Column(db.Float)
-    is_featured = db.Column(db.Boolean, default=False)
-    status = db.Column(db.String(20), default='open')  # open, closed, in_progress
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    def to_dict(self):
-        """Convert Job object to dictionary for JSON serialization"""
-        return {
-            'id': self.id,
-            'client_id': self.client_id,
-            'title': self.title,
-            'description': self.description,
-            'requirements': self.requirements,
-            'budget': self.budget,
-            'is_featured': self.is_featured,
-            'status': self.status,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
-        }
 
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
     requirements = db.Column(db.Text)
@@ -61,15 +21,17 @@ kibet
     location = db.Column(db.String(200))
     job_type = db.Column(db.String(50))  # full-time, part-time, contract, etc.
     status = db.Column(db.Enum(JobStatus), default=JobStatus.OPEN)
+    is_featured = db.Column(db.Boolean, default=False)
+
     client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationships
     client = db.relationship("User", back_populates="posted_jobs")
     applications = db.relationship("Application", back_populates="job")
     skills = db.relationship("Skill", secondary=job_skill_association, back_populates="jobs")
-    
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -82,9 +44,8 @@ kibet
             'job_type': self.job_type,
             'status': self.status.value if self.status else None,
             'client_id': self.client_id,
+            'is_featured': self.is_featured,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'client': self.client.to_dict() if self.client else None,
             'skills': [skill.to_dict() for skill in self.skills] if self.skills else []
         }
-main
