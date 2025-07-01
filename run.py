@@ -6,3 +6,10 @@ if __name__ == '__main__':
     print("Starting Flask development server...")
     print("Server will be available at: http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+@app.route('/')
+def index():
+    return {'message': 'Backend is running'}, 200
+@app.route('/health')
+def health_check():
+    return {'status': 'healthy'}, 200

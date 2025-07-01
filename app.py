@@ -46,6 +46,7 @@ def create_app():
     if os.path.exists('instance'):
         print(f"Instance directory permissions: {oct(os.stat('instance').st_mode)[-3:]}")
        
+    # Initialize extensions with app
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
@@ -63,10 +64,11 @@ def create_app():
     api.add_resource(ChangePasswordResource, '/api/users/change-password')
     api.add_resource(UserStatsResource, '/api/users/<int:user_id>/stats')
     api.add_resource(TokenVerificationResource, '/api/verify-token')
-    api.add_resource(UserProfileResource, '/api/users/<int:user_id>/profile')
     api.add_resource(UserApplicationsResource, '/api/users/<int:user_id>/applications')
     api.add_resource(LogoutResource, '/api/logout')
-             
+    api.add_resource(UserProfileResource, '/api/users/<int:user_id>/profile')
+   
+    # Create database tables within app context
     with app.app_context():
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         db.create_all()

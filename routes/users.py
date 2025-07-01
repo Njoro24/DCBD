@@ -16,7 +16,7 @@ class UserResource(Resource):
         GET /api/users/:id
         Get public user info (for job client details)
         """
-        user_controller = UserController(db)  # Pass db instance
+        user_controller = UserController(db)  
         
         try:
             user = user_controller.get_client_info(user_id)
@@ -38,6 +38,7 @@ class UserResource(Resource):
             return public_user_info, 200
             
         except Exception as e:
+            print(f"Error in UserResource.get: {e}")
             return {'error': 'Internal server error'}, 500
     
     @jwt_required()
@@ -52,7 +53,7 @@ class UserResource(Resource):
             current_user_id = get_jwt_identity()
             
             # Users can only update their own profile
-            if current_user_id != user_id:
+            if int(current_user_id) != int(user_id):
                 return {'error': 'Unauthorized to update this profile'}, 403
             
             data = request.get_json()
@@ -77,6 +78,7 @@ class UserResource(Resource):
                 return {'error': 'Failed to update profile'}, 500
                 
         except Exception as e:
+            print(f"Error in UserResource.put: {e}")
             return {'error': 'Internal server error'}, 500
     
     @jwt_required()
@@ -91,7 +93,7 @@ class UserResource(Resource):
             current_user_id = get_jwt_identity()
             
             # Users can only delete their own account
-            if current_user_id != user_id:
+            if int(current_user_id) != int(user_id):
                 return {'error': 'Unauthorized to delete this account'}, 403
             
             # Delete user
@@ -103,6 +105,7 @@ class UserResource(Resource):
                 return {'error': 'Failed to delete account'}, 500
                 
         except Exception as e:
+            print(f"Error in UserResource.delete: {e}")
             return {'error': 'Internal server error'}, 500
 
 class UserListResource(Resource):
@@ -148,6 +151,7 @@ class UserListResource(Resource):
             }, 200
             
         except Exception as e:
+            print(f"Error in UserListResource.get: {e}")
             return {'error': 'Internal server error'}, 500
 
 class ChangePasswordResource(Resource):
@@ -175,7 +179,7 @@ class ChangePasswordResource(Resource):
                 return {'error': 'Current password and new password are required'}, 400
             
             # Get user
-            user = user_controller.get_user_by_id(current_user_id)
+            user = user_controller.get_user_with_password(int(current_user_id))
             if not user:
                 return {'error': 'User not found'}, 404
             
@@ -187,7 +191,7 @@ class ChangePasswordResource(Resource):
             new_password_hash = generate_password_hash(new_password)
             
             # Update password
-            success = user_controller.update_password(current_user_id, new_password_hash)
+            success = user_controller.update_password(int(current_user_id), new_password_hash)
             
             if success:
                 return {'message': 'Password changed successfully'}, 200
@@ -195,6 +199,7 @@ class ChangePasswordResource(Resource):
                 return {'error': 'Failed to change password'}, 500
                 
         except Exception as e:
+            print(f"Error in ChangePasswordResource.put: {e}")
             return {'error': 'Internal server error'}, 500
 
 class UserStatsResource(Resource):
@@ -209,7 +214,7 @@ class UserStatsResource(Resource):
         try:
             current_user_id = get_jwt_identity()
             
-            if current_user_id == user_id:
+            if int(current_user_id) == int(user_id):
                 stats = user_controller.get_user_detailed_stats(user_id)
             else:
                 stats = user_controller.get_user_public_stats(user_id)
@@ -220,6 +225,7 @@ class UserStatsResource(Resource):
                 return {'error': 'User not found'}, 404
                 
         except Exception as e:
+            print(f"Error in UserStatsResource.get: {e}")
             return {'error': 'Internal server error'}, 500
 
 class TokenVerificationResource(Resource):
@@ -233,12 +239,12 @@ class TokenVerificationResource(Resource):
         
         try:
             current_user_id = get_jwt_identity()
-            user = user_controller.get_user_by_id(current_user_id)
+            user = user_controller.get_user_by_id(int(current_user_id))
             
             if user:
                 return {
                     'valid': True,
-                    'user_id': current_user_id,
+                    'user_id': int(current_user_id),
                     'first_name': user.get('first_name'),
                     'last_name': user.get('last_name'),
                     'email': user.get('email')
@@ -247,6 +253,7 @@ class TokenVerificationResource(Resource):
                 return {'valid': False, 'message': 'User not found'}, 404
                 
         except Exception as e:
+            print(f"Error in TokenVerificationResource.get: {e}")
             return {'valid': False, 'message': 'Invalid token'}, 401
 
 class UserProfileResource(Resource):
@@ -262,7 +269,7 @@ class UserProfileResource(Resource):
             current_user_id = get_jwt_identity()
             
             # Users can only access their own complete profile
-            if current_user_id != user_id:
+            if int(current_user_id) != int(user_id):
                 return {'error': 'Unauthorized access'}, 403
                 
             user = user_controller.get_user_by_id(user_id)
@@ -280,12 +287,14 @@ class UserProfileResource(Resource):
                 'company': user.get('company'),
                 'position': user.get('position'),
                 'bio': user.get('bio'),
-                'created_at': user.get('created_at')
+                'created_at': user.get('created_at'),
+                'skills': []  
             }
             
             return profile_data, 200
             
         except Exception as e:
+            print(f"Error in UserProfileResource.get: {e}")
             return {'error': 'Internal server error'}, 500
 
 class UserApplicationsResource(Resource):
@@ -301,7 +310,7 @@ class UserApplicationsResource(Resource):
             current_user_id = get_jwt_identity()
             
             # Users can only access their own applications
-            if current_user_id != user_id:
+            if int(current_user_id) != int(user_id):
                 return {'error': 'Unauthorized access'}, 403
                 
             # Get applications for the user
@@ -313,6 +322,7 @@ class UserApplicationsResource(Resource):
                 return {'error': 'User not found or no applications'}, 404
                 
         except Exception as e:
+            print(f"Error in UserApplicationsResource.get: {e}")
             return {'error': 'Internal server error'}, 500
 
 class LogoutResource(Resource):
@@ -323,11 +333,11 @@ class LogoutResource(Resource):
         Logout user (token blacklisting could be implemented here)
         """
         try:
-            # In a full implementation, you might want to blacklist the token
-            # For now, just return success - the frontend will remove the token
+           
             return {'message': 'Logged out successfully'}, 200
             
         except Exception as e:
+            print(f"Error in LogoutResource.post: {e}")
             return {'error': 'Internal server error'}, 500
 
 # Register all the resources with their endpoints

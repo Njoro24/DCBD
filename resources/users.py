@@ -10,7 +10,7 @@ class UserResource(Resource):
         GET /api/users/:id
         Get public user info (for job client details)
         """
-        user_controller = UserController(db.session)  # Fixed: Added db.session
+        user_controller = UserController(db.session)  
         
         try:
             user = user_controller.get_client_info(user_id)
@@ -40,7 +40,7 @@ class UserResource(Resource):
         PUT /api/users/:id
         Update user profile (only own profile)
         """
-        user_controller = UserController(db.session)  # Fixed: Added db.session
+        user_controller = UserController(db.session)  
         
         try:
             current_user_id = get_jwt_identity()
@@ -79,7 +79,7 @@ class UserResource(Resource):
         DELETE /api/users/:id
         Delete user account (only own account)
         """
-        user_controller = UserController(db.session)  # Fixed: Added db.session
+        user_controller = UserController(db.session)  
         
         try:
             current_user_id = get_jwt_identity()
@@ -106,7 +106,7 @@ class UserListResource(Resource):
         GET /api/users
         Get list of users (admin only or for search functionality)
         """
-        user_controller = UserController(db.session)  # Fixed: Added db.session
+        user_controller = UserController(db.session)  
         
         try:
             # Get query parameters for filtering/searching
@@ -153,7 +153,7 @@ class ChangePasswordResource(Resource):
         """
         from werkzeug.security import generate_password_hash, check_password_hash
         
-        user_controller = UserController(db.session)  # Fixed: Added db.session
+        user_controller = UserController(db.session)  
         
         try:
             current_user_id = get_jwt_identity()
@@ -198,7 +198,7 @@ class UserStatsResource(Resource):
         GET /api/users/:id/stats
         Get user statistics (jobs posted, applications sent, etc.)
         """
-        user_controller = UserController(db.session)  # Fixed: Added db.session
+        user_controller = UserController(db.session)  
         
         try:
             current_user_id = get_jwt_identity()
@@ -251,8 +251,7 @@ class UserProfileResource(Resource):
         GET /api/users/:id/profile
         Get complete user profile (own profile only)
         """
-        user_controller = UserController(db.session)  # Fixed: Added db.session
-        
+        user_controller = UserController(db.session)  
         try:
             current_user_id = get_jwt_identity()
             
@@ -290,7 +289,7 @@ class UserApplicationsResource(Resource):
         GET /api/users/:id/applications
         Get user's job applications
         """
-        user_controller = UserController(db.session)  # Fixed: Added db.session
+        user_controller = UserController(db.session)  
         
         try:
             current_user_id = get_jwt_identity()
@@ -318,8 +317,7 @@ class LogoutResource(Resource):
         Logout user (token blacklisting could be implemented here)
         """
         try:
-            # In a full implementation, you might want to blacklist the token
-            # For now, just return success - the frontend will remove the token
+            
             return {'message': 'Logged out successfully'}, 200
             
         except Exception as e:
