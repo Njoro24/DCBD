@@ -1,11 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import enum
-
-from models.user import User
-from models.job import Job
-
-db = SQLAlchemy()
+from extensions import db
 
 class ApplicationStatus(enum.Enum):
     PENDING = "pending"
@@ -34,4 +29,10 @@ class Application(db.Model):
             "cover_letter": self.cover_letter,
             "status": self.status.value if self.status else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+            # Helpful for developer profile:
+            "job": {
+                "id": self.job.id,
+                "title": self.job.title,
+                "company": self.job.client.name if self.job.client else "Unknown"
+            } if self.job else None
         }

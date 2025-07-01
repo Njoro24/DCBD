@@ -1,9 +1,9 @@
-# Import db so it is available in this module
 from extensions import db
 
-# Import all models
+# Import all models — ORDER MATTERS
 from .user import User
+from .skill import Skill  # Must come before job so skills table exists
 from .job import Job
+from .application import Application
 
-# Export all models and db
-__all__ = ["User", "Job", "db"]
+__all__ = ["User", "Skill", "Job", "Application", "db"]

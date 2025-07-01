@@ -1,11 +1,9 @@
-# routes/auth.py
-
 from flask import Blueprint, jsonify
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required
 from controllers.auth_controller import register_user, login_user, get_current_user
 
-auth_bp = Blueprint("auth", __name__)
+auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 api = Api(auth_bp)
 
 # --- Auth Resources ---
@@ -22,13 +20,14 @@ class MeAPI(Resource):
     def get(self):
         return get_current_user()
 
+
 # --- Register RESTful Routes ---
-api.add_resource(RegisterAPI, '/api/auth/register')
-api.add_resource(LoginAPI, '/api/auth/login')
-api.add_resource(MeAPI, '/api/auth/me')
+api.add_resource(RegisterAPI, '/register')
+api.add_resource(LoginAPI, '/login')
+api.add_resource(MeAPI, '/me')
 
 # --- Verify Token (Non-Resource Route) ---
-@auth_bp.route('/api/auth/verify-token', methods=['GET'])
+@auth_bp.route('/verify-token', methods=['GET'])
 @jwt_required()
 def verify_token():
     return jsonify({"message": "Token is valid"}), 200
